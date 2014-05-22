@@ -17,7 +17,7 @@ class Section < ActiveRecord::Base
   before_save :transliterate
 
   def transliterate
-    self.name_en = Russian::transliterate(name_ru)
+    self.name_en = Russian::transliterate(name_ru) if name_ru
   end
 end
 
@@ -35,8 +35,8 @@ class Article < ActiveRecord::Base
   before_save :transliterate
 
   def transliterate
-    self.title_en = Russian::transliterate(title_ru)
-    self.abstract_en = Russian::transliterate(abstract_ru)
+    self.title_en = Russian::transliterate(title_ru) if title_ru 
+    self.abstract_en = Russian::transliterate(abstract_ru) if abstract_ru
   end
 end
 
@@ -46,7 +46,7 @@ class ArticleReference < ActiveRecord::Base
   before_save :transliterate
 
   def transliterate
-    self.text_en = Russian::transliterate(text_ru)
+    self.text_en = Russian::transliterate(text_ru) if text_ru
   end
 end
 
@@ -57,7 +57,7 @@ class Organization < ActiveRecord::Base
   before_save :transliterate
 
   def transliterate
-    self.name_en = Russian::transliterate(name_ru)
+    self.name_en = Russian::transliterate(name_ru) if name_ru
   end
 end
 
@@ -67,9 +67,9 @@ class Author < ActiveRecord::Base
   before_save :transliterate
 
   def transliterate
-    self.name_en = Russian::transliterate(name_ru)
-    self.middle_name_en = Russian::transliterate(middle_name_ru)
-    self.last_name_en = Russian::transliterate(last_name_ru)
+    self.name_en = Russian::transliterate(name_ru) if name_ru 
+    self.middle_name_en = Russian::transliterate(middle_name_ru) if middle_name_ru
+    self.last_name_en = Russian::transliterate(last_name_ru) if last_name_ru
   end
 end
 
@@ -87,7 +87,7 @@ class Keyword < ActiveRecord::Base
   before_save :transliterate
 
   def transliterate
-    self.name_en = Russian::transliterate(name_ru)
+    self.name_en = Russian::transliterate(name_ru) if name_ru
   end
 end
 
