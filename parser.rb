@@ -141,14 +141,18 @@ def parse_article(maik_id)
       }).first_or_create
   end
 
-  article_json[:keywords].each do |kwtitle|
+  article_json[:keywords].each_with_index do |kwtitle,i|
     kw = Keyword.where(name_ru:kwtitle).first_or_create
-    unless article.keywords.include?(kw)
-      article.keywords << kw
-    end
+
+    ArticleKeyword.where(article_id:article.id).delete_all
+    article.article_keywords.create({
+      keyword_id: kw.id,
+      order: i
+    })
   end
 
-  article_json[:authors_orgs].each do |author_name, org_name|
+  article_json[:authors_orgs].each_with_index do |arr, i|
+    author_name, org_name = arr
     aname_arr = author_name.delete('.').split
     author = Author.where({
       name_ru: aname_arr[0].first,
@@ -162,10 +166,10 @@ def parse_article(maik_id)
 
     # article.authors.delete_all
     ArticleAuthor.where(article_id:article.id).delete_all
-    ArticleAuthor.create({
-      article_id: article.id,
+    article.article_authors.create({
       author_id: author.id,
-      organization_id: org.id
+      organization_id: org.id,
+      order: i
     })
   end
 
