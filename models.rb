@@ -1,5 +1,6 @@
 require 'active_record'
 require 'mysql2'
+require 'russian'
 
 ActiveRecord::Base.establish_connection(
   :adapter => 'mysql2',
@@ -12,6 +13,12 @@ end
 
 class Section < ActiveRecord::Base
   has_many :articles
+
+  before_save :transliterate
+
+  def transliterate
+    self.name_en = Russian::transliterate(name_ru)
+  end
 end
 
 class Article < ActiveRecord::Base
@@ -24,19 +31,46 @@ class Article < ActiveRecord::Base
   has_many :authors, :through => :article_authors
   has_many :organizations, :through => :article_authors
   has_many :keywords, :through => :article_keywords
+
+  before_save :transliterate
+
+  def transliterate
+    self.title_en = Russian::transliterate(title_ru)
+    self.abstract_en = Russian::transliterate(abstract_ru)
+  end
 end
 
 class ArticleReference < ActiveRecord::Base
   belongs_to :article
+
+  before_save :transliterate
+
+  def transliterate
+    self.text_en = Russian::transliterate(text_ru)
+  end
 end
 
 
 class Organization < ActiveRecord::Base
   has_many :article_authors
+
+  before_save :transliterate
+
+  def transliterate
+    self.name_en = Russian::transliterate(name_ru)
+  end
 end
 
 class Author < ActiveRecord::Base
   has_many :article_authors
+
+  before_save :transliterate
+
+  def transliterate
+    self.name_en = Russian::transliterate(name_ru)
+    self.middle_name_en = Russian::transliterate(middle_name_ru)
+    self.last_name_en = Russian::transliterate(last_name_ru)
+  end
 end
 
 class ArticleAuthor < ActiveRecord::Base
@@ -49,6 +83,12 @@ end
 
 class Keyword < ActiveRecord::Base
   has_many :article_keywords
+
+  before_save :transliterate
+
+  def transliterate
+    self.name_en = Russian::transliterate(name_ru)
+  end
 end
 
 class ArticleKeyword < ActiveRecord::Base

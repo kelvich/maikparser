@@ -49,8 +49,8 @@ CREATE TABLE `articles` (
   `title_en` varchar(500),
   `email` varchar(150),
   `maik_id` varchar(150),
-  `abstract_ru` varchar(2000),
-  `abstract_en` varchar(2000),
+  `abstract_ru` varchar(5000),
+  `abstract_en` varchar(5000),
   `doi` varchar(80),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
