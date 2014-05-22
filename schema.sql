@@ -25,11 +25,11 @@ DROP TABLE IF EXISTS `article_references`;
 CREATE TABLE `article_references` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `article_id` int(11),
-  `text_ru` varchar(250) CHARACTER SET utf8,
-  `text_en` varchar(250) CHARACTER SET utf8,
-  `order` tinyint(4),
+  `text_ru` varchar(1500) CHARACTER SET utf8,
+  `text_en` varchar(1500) CHARACTER SET utf8,
+  `order` int(11),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1754 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -51,8 +51,9 @@ CREATE TABLE `articles` (
   `maik_id` varchar(150),
   `abstract_ru` varchar(2000),
   `abstract_en` varchar(2000),
+  `doi` varchar(80),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=163 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -72,7 +73,7 @@ CREATE TABLE `authors` (
   `last_name_ru` varchar(150),
   `last_name_en` varchar(150),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=424 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -120,7 +121,7 @@ CREATE TABLE `issues` (
   `page_end` mediumint(9),
   `articles_number` tinyint(4) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -135,7 +136,7 @@ CREATE TABLE `keywords` (
   `name_ru` varchar(250),
   `name_en` varchar(250),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=740 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -152,7 +153,7 @@ CREATE TABLE `organizations` (
   `place_ru` varchar(200),
   `place_en` varchar(200),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=389 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -167,7 +168,7 @@ CREATE TABLE `sections` (
   `name_ru` varchar(250),
   `name_en` varchar(250),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

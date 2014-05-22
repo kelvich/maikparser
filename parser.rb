@@ -21,7 +21,7 @@ end
 ### Load all issues in given year
 def load_issue_ids(year)
   issues_url = "http://www.maikonline.com/maik/showIssues.do?juid=#{JOURNAL}&year=#{year}"
-  issue_links_page = Nokogiri::HTML(open(issues_url))
+  issue_links_page = Nokogiri::HTML(open(issues_url, :read_timeout => 150))
   issue_links_page.
     xpath('//a[@class="bs-table-link" and text()="HTML"]').
     map{|l| l.attributes['href'].value.split('=').last }
@@ -30,7 +30,7 @@ end
 ### Load issue content
 def load_issue_with_article_ids(issue_id)
   issue_url = "http://www.maikonline.com/maik/showIssueContent.do?puid=#{issue_id}&lang=ru"
-  issue_page = Nokogiri::HTML(open(issue_url), nil, 'utf-8')
+  issue_page = Nokogiri::HTML(open(issue_url, :read_timeout => 150), nil, 'utf-8')
 
   issue_text = issue_page.
     css('span[style="font-size: 117%;"]').
@@ -65,7 +65,7 @@ end
 ### Parse specific article
 def load_article(article_id)
   article_url = "http://www.maikonline.com/maik/showArticle.do?auid=#{article_id}&lang=ru"
-  article_page = Nokogiri::HTML(open(article_url), nil, 'utf-8')
+  article_page = Nokogiri::HTML(open(article_url, :read_timeout => 150), nil, 'utf-8')
 
   article = {}
   article[:title] = article_page.css('.bs-text-black-12px > b').text
@@ -75,10 +75,11 @@ def load_article(article_id)
     css('p[style="text-align:justify;"]').text
   article[:doi] = article_page.css('a.alink').last.text[/[^ ]+$/]
 
-  unless article_page.css('a.alink ~ sup').empty?
+  unless article_page.css('a.alink + sup').map{|sup| sup.text[/\d+/]}.compact.empty?
     assocs = article_page.
-      css('a.alink ~ sup').
-      map{|sup| sup.text.to_i}
+      css('a.alink + sup').
+      map{|sup| sup.text[/\d+/].to_i }.
+      compact
     authors = article_page.
       css('a.alink')[0..-2].
       map(&:text)
@@ -88,7 +89,7 @@ def load_article(article_id)
       reject{|tag| tag.name != 'text'}.
       map(&:text)
     article[:authors_orgs] = authors.zip(assocs).
-      map{|arr| arr[1] = orgs[arr[1]-1]; arr }
+      map{|arr| arr[1] = orgs[(arr[1] || 1)-1]; arr }
   else
     authors = article_page.
       css('a.alink')[0..-2].
@@ -104,18 +105,94 @@ def load_article(article_id)
     children.
     reject{|tag| tag.name != 'text'}.
     map(&:text).
-    reject{|str| str[':'].nil? }.
-    first.
+    join.
+    strip.
     split(':').last.
     split(', ').
-    map(&:strip)
+    map{ |kw| kw.strip.delete('.') }
 
-  article[:refs] = article_page.css('ol > li').map(&:text).last
+  article[:refs] = article_page.css('ol > li').map(&:text)
 
   article
 end
 
 
+
+
+###############
+
+
+
+def parse_article(maik_id)
+  article_json = load_article(maik_id)
+  article = Article.where(maik_id:maik_id).first
+  article.title_ru = article_json[:title]
+  article.abstract_ru = article_json[:abstract]
+  article.doi = article_json[:doi]
+  article.page_start = article_json[:pages].first
+  article.page_end = article_json[:pages].last
+  article.save
+
+  article_json[:refs].each_with_index do |reftitle, i|
+    ArticleReference.where({
+      text_ru: reftitle,
+      article_id: article.id,
+      order: i
+      }).first_or_create
+  end
+
+  article_json[:keywords].each do |kwtitle|
+    kw = Keyword.where(name_ru:kwtitle).first_or_create
+    unless article.keywords.include?(kw)
+      article.keywords << kw
+    end
+  end
+
+  article_json[:authors_orgs].each do |author_name, org_name|
+    aname_arr = author_name.delete('.').split
+    author = Author.where({
+      name_ru: aname_arr[0].first,
+      middle_name_ru: aname_arr[1].first,
+      last_name_ru: aname_arr.last
+    }).first_or_create
+
+    org = Organization.where({
+      name_ru: org_name
+      }).first_or_create
+
+    # article.authors.delete_all
+    ArticleAuthor.where(article_id:article.id).delete_all
+    ArticleAuthor.create({
+      article_id: article.id,
+      author_id: author.id,
+      organization_id: org.id
+    })
+  end
+
+end
+
+def parse_issues
+  years = load_all_years
+  puts "Loaded #{years.join(', ')} years."
+  years.each do |year|
+    issue_ids = load_issue_ids(year)
+    puts "Loaded #{issue_ids.join(', ')} issues."
+    issue_ids.each do |issue_id|
+      puts "Parsing #{year}, Issue##{issue_id}."
+      issue_json, articles_by_sections = load_issue_with_article_ids(issue_id)
+      issue = Issue.where(issue_json).first_or_create
+      articles_by_sections.each do |arr|
+        section_name = arr.first
+        article_ids = arr.last
+        section = Section.where(name_ru: section_name).first_or_create
+        article_ids.each do |article_id|
+          section.articles.where(maik_id: article_id).first_or_create
+        end
+      end
+      puts "Last article id: #{Article.last.id}"
+    end
+  end
+end
 
 
 
