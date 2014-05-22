@@ -73,7 +73,15 @@ def load_article(article_id)
     text.split(' ').last.split('-')
   article[:abstract] = article_page.
     css('p[style="text-align:justify;"]').text
-  article[:doi] = article_page.css('a.alink').last.text[/[^ ]+$/]
+  if article_page.xpath('//font[contains(text(),"DOI")]').empty?
+    puts "!Warning: there is no explicit DOI given, using prefix '10.1134/'"
+    article[:doi] = '10.1134/' + article_page.
+      xpath('//font[contains(text(),"PII")]').
+      text.strip.
+      split(' ').last
+  else
+    article[:doi] = article_page.css('a.alink').last.text[/[^ ]+$/]
+  end
 
   unless article_page.css('a.alink + sup').map{|sup| sup.text[/\d+/]}.compact.empty?
     assocs = article_page.
@@ -171,6 +179,8 @@ def parse_article(maik_id)
       organization_id: org.id,
       order: i
     })
+    
+    article
   end
 
 end
