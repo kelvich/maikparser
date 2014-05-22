@@ -186,7 +186,7 @@ def parse_issues
         article_ids = arr.last
         section = Section.where(name_ru: section_name).first_or_create
         article_ids.each do |article_id|
-          section.articles.where(maik_id: article_id).first_or_create
+          section.articles.where(maik_id: article_id, issue_id: issue.id).first_or_create
         end
       end
       puts "Last article id: #{Article.last.id}"
