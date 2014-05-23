@@ -79,8 +79,10 @@ def load_article(article_id)
       xpath('//font[contains(text(),"PII")]').
       text.strip.
       split(' ').last
+    authors_offset = 1
   else
     article[:doi] = article_page.css('a.alink').last.text[/[^ ]+$/]
+    authors_offset = 2
   end
 
   unless article_page.css('a.alink + sup').map{|sup| sup.text[/\d+/]}.compact.empty?
@@ -89,7 +91,7 @@ def load_article(article_id)
       map{|sup| sup.text[/\d+/].to_i }.
       compact
     authors = article_page.
-      css('a.alink')[0..-2].
+      css('a.alink')[0..-authors_offset].
       map(&:text)
     orgs = article_page.
       css('span[style="font-size: 80%;"]').
@@ -100,7 +102,7 @@ def load_article(article_id)
       map{|arr| arr[1] = orgs[(arr[1] || 1)-1]; arr }
   else
     authors = article_page.
-      css('a.alink')[0..-2].
+      css('a.alink')[0..-authors_offset].
       map(&:text)
     org = article_page.
       css('span[style="font-size: 80%;"]').
