@@ -7,8 +7,10 @@ ActiveRecord::Base.establish_connection(
   :database => 'vestnik'
 )
 
+
+# Issue.find_each{|is| is.articles_number = is.articles.count; is.save }
 class Issue < ActiveRecord::Base
-  has_many :articles
+  has_many :articles, :counter_cache => :articles_number
 end
 
 class Section < ActiveRecord::Base

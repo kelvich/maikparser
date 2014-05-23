@@ -41,7 +41,7 @@ def load_issue_with_article_ids(issue_id)
     volume: issue_text[0][/\d+/],
     number: issue_text[1][/\d+/], # first, if several
     page_start: issue_text[3].split('-')[0][/\d+/],
-    page_end: issue_text[3].split('-')[0][/\d+/],
+    page_end: issue_text[3].split('-')[1][/\d+/],
     # articles_number: 0 # do not fill at this time
   }
 
@@ -146,19 +146,21 @@ def parse_article(maik_id)
       text_ru: reftitle,
       article_id: article.id,
       order: i
-      }).first_or_create
+    }).first_or_create
   end
 
+
+  ArticleKeyword.where(article_id:article.id).delete_all
   article_json[:keywords].each_with_index do |kwtitle,i|
     kw = Keyword.where(name_ru:kwtitle).first_or_create
-
-    ArticleKeyword.where(article_id:article.id).delete_all
-    article.article_keywords.create({
+    ArticleKeyword.create!({
+      article_id: article.id,
       keyword_id: kw.id,
       order: i
     })
   end
 
+  ArticleAuthor.where(article_id:article.id).delete_all
   article_json[:authors_orgs].each_with_index do |arr, i|
     author_name, org_name = arr
     aname_arr = author_name.delete('.').split
@@ -172,17 +174,16 @@ def parse_article(maik_id)
       name_ru: org_name
       }).first_or_create
 
-    # article.authors.delete_all
-    ArticleAuthor.where(article_id:article.id).delete_all
-    article.article_authors.create({
+    ArticleAuthor.create({
+      article_id: article.id,
       author_id: author.id,
       organization_id: org.id,
       order: i
     })
-    
-    article
+  
   end
 
+  article
 end
 
 def parse_issues

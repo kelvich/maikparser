@@ -4,7 +4,7 @@ require './models.rb'
 require './parser.rb'
 
 # добавил maik_id
-# Issue.number лучше тектовым, из-за двойных
+# Issue.number лучше текcтовым, из-за двойных номеров
 # убрал not nulls
 # увеличил article_references.text, встречаются жирные
 # добавил doi
@@ -12,7 +12,7 @@ require './parser.rb'
 
 parse_issues
 
-maik_ids = Article.pluck(:maik_id)[257..-1]
+maik_ids = Article.pluck(:maik_id)
 maik_ids.each_with_index do |maik_id,i|
   begin
     puts "Parsing ##{maik_id} (#{i+1}/#{maik_ids.count})."
